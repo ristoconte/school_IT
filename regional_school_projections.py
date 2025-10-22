@@ -14,30 +14,59 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # NUTS code to region name mapping
+# Note: elementari.csv uses older NUTS classification (ITD*, ITE* instead of ITH*, ITI*)
 NUTS_TO_REGION = {
+    # ITC - Northwest
     'ITC1': 'Piemonte',
-    'ITC2': 'Valle d Aosta-Vallee d Aoste',
+    'ITC2': "Valle d'Aosta",
     'ITC3': 'Liguria',
     'ITC4': 'Lombardia',
-    'ITH1': 'Provincia autonoma di Bolzano',
-    'ITH2': 'Provincia autonoma di Trento',
-    'ITH3': 'Veneto',
-    'ITH4': 'Friuli-Venezia Giulia',
-    'ITH5': 'Emilia-Romagna',
-    'ITI1': 'Toscana',
-    'ITI2': 'Umbria',
-    'ITI3': 'Marche',
-    'ITI4': 'Lazio',
+    # ITD - Northeast (old classification, now ITH in current NUTS)
+    'ITD1': 'Provincia autonoma Bolzano/Bozen',
+    'ITD2': 'Provincia autonoma Trento',
+    'ITD3': 'Veneto',
+    'ITD4': 'Friuli-Venezia Giulia',
+    'ITD5': 'Emilia-Romagna',
+    'ITDA': 'Trentino-Alto Adige',  # Aggregated region
+    # ITE - Center (old classification, now ITI in current NUTS)
+    'ITE1': 'Toscana',
+    'ITE2': 'Umbria',
+    'ITE3': 'Marche',
+    'ITE4': 'Lazio',
+    # ITF - South
     'ITF1': 'Abruzzo',
     'ITF2': 'Molise',
     'ITF3': 'Campania',
     'ITF4': 'Puglia',
     'ITF5': 'Basilicata',
     'ITF6': 'Calabria',
+    # ITG - Islands
     'ITG1': 'Sicilia',
     'ITG2': 'Sardegna',
-    # Trentino-Alto Adige is aggregated
-    'ITH': 'Trentino-Alto Adige'
+}
+
+# Mapping for shapefile COD_REG to region names
+COD_REG_TO_NUTS = {
+    1: 'ITC1',   # Piemonte
+    2: 'ITC2',   # Valle d'Aosta
+    3: 'ITC4',   # Lombardia
+    4: 'ITDA',   # Trentino-Alto Adige (or ITD1+ITD2)
+    5: 'ITD3',   # Veneto
+    6: 'ITD4',   # Friuli-Venezia Giulia
+    7: 'ITC3',   # Liguria
+    8: 'ITD5',   # Emilia-Romagna
+    9: 'ITE1',   # Toscana
+    10: 'ITE2',  # Umbria
+    11: 'ITE3',  # Marche
+    12: 'ITE4',  # Lazio
+    13: 'ITF1',  # Abruzzo
+    14: 'ITF2',  # Molise
+    15: 'ITF3',  # Campania
+    16: 'ITF4',  # Puglia
+    17: 'ITF5',  # Basilicata
+    18: 'ITF6',  # Calabria
+    19: 'ITG1',  # Sicilia
+    20: 'ITG2',  # Sardegna
 }
 
 def process_school_data(filepath='elementari.csv'):
@@ -98,9 +127,8 @@ def process_school_data(filepath='elementari.csv'):
     # Map NUTS codes to region names
     df_wide['region'] = df_wide['ref_area'].map(NUTS_TO_REGION)
 
-    # Filter for main regions (NUTS2 level - 3 or 4 character codes starting with IT)
-    # Exclude national total (IT) and sub-regional levels
-    df_wide = df_wide[df_wide['ref_area'].str.len().isin([4])]
+    # Filter for main regions (NUTS2 level)
+    # Keep only codes that are in our mapping (excludes national IT and NUTS3 sub-regions)
     df_wide = df_wide[df_wide['region'].notna()]
 
     print(f"\nFinal dataset: {len(df_wide)} rows")
